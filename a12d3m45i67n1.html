@@ -235,7 +235,7 @@
                     container.appendChild(ice);
                 } else {
                     // 연습생 일정일 경우 숫자도 회색처리
-                    num.style.color = isTrainee ? "#888" : "#fff";
+                    num.style.color = isTrainee ? "#333" : "#fff";
                     num.style.backgroundColor = categoryColors[firstSchedule.cat] || 'transparent';
                     
                     schedules.forEach((s, idx) => {
@@ -244,7 +244,7 @@
                         item.style.backgroundColor = categoryColors[s.cat] || 'transparent';
                         
                         // 연습생 일정일 경우 일정 텍스트도 회색처리
-                        if (s.cat === "연습생일정") item.style.color = "#888";
+                        if (s.cat === "연습생일정") item.style.color = "#333";
                         
                         if(idx > 0) item.style.borderTop = "1px solid rgba(255,255,255,0.1)";
                         item.textContent = s.text;
@@ -408,5 +408,6 @@ async function exportImage() {
 </script>
 </body>
 </html>
+
 
 
