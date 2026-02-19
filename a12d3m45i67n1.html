@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-        /* --- 기존 스타일 완벽 복구 --- */
+        /* --- 기존 스타일 유지 --- */
         @font-face {
             font-family: 'planb';
             src: url('data:application/octet-stream;base64,T1RUTwAOAIAAAwBgQ0ZGIMIfBUQAAD3gAAb5yERTSUcAAAABAAkOxAAAAAhHU1VCLZKgnAAHN6gAAK5+T1MvMn13UPQAAAFQAAAAYFZPUkfRZ4yIAAfmKAAABChjbWFw1c4mjQAABZQAADgqaGVhZMAtWyYAAADsAAAANmhoZWEGwSgAAAABJAAAACRobXR4Om/30QAH6lAAAJIobWF4cCSKUAAAAAFIAAAABm5hbWUfnyFwAAABsAAAA+Jwb3N0/7gAMgAAPcAAAAAgdmhlYQZPNeoACHx4AAAAJHZtdHg6anN7AAh8nAAAkigAAQAAAAEZmuMf/3BfDzz1AAMD6AAAAAB8JZ3AAAAAAOGiYF7/bP70A...'); 
@@ -42,14 +42,22 @@
         .ice-emoji-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); font-size: 50px; }
         .notice-area { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 13px; line-height: 1.8; font-weight: bold; }
 
-        /* --- 하단 업데이트 정보 (화면에 영향 없는 안전한 스타일) --- */
-        .credit-area { width: 100%; max-width: 1050px; text-align: center; color: #666; font-size: 13px; line-height: 1.8; margin-top: 20px; margin-bottom: 50px; }
-        .sync-display { margin-bottom: 15px; font-size: 11px; color: #555; }
-        .sync-display span { margin: 0 10px; }
+        /* --- 하단 크레딧 및 동기화 바 (가시성 개선) --- */
+        .credit-area { width: 100%; max-width: 1050px; text-align: center; color: #666; font-size: 13px; margin-top: 20px; padding-bottom: 50px; }
+        .sync-status-bar { 
+            display: inline-flex; align-items: center; gap: 12px; 
+            background: rgba(255,255,255,0.03); padding: 10px 20px; 
+            border-radius: 12px; margin-bottom: 25px; border: 1px solid #222;
+        }
+        .sync-item { display: flex; align-items: center; gap: 6px; }
+        .sync-label { color: #888; font-weight: bold; font-size: 11px; }
+        .sync-value { color: #bbb; font-size: 11px; }
+        .sync-divider { color: #444; width: 1px; height: 12px; background: #333; }
+        
         .credit-title { font-weight: bold; color: #888; margin-bottom: 8px; }
         .copyright { font-size: 11px; color: #444; margin-top: 15px; }
 
-        /* --- 모달 스타일 (박살 난 부분 복구) --- */
+        /* --- 모달 디자인 복구 --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 30px; border-radius: 24px; width: 400px; border: 1px solid var(--border); max-height: 85vh; overflow-y: auto; }
         .list-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
@@ -107,9 +115,16 @@
 </div>
 
 <div class="credit-area no-export">
-    <div class="sync-display">
-        <span id="last-db-update">Last Sync: -</span>
-        <span id="last-github-update">System: -</span>
+    <div class="sync-status-bar">
+        <div class="sync-item">
+            <span class="sync-label">DATA SYNC:</span>
+            <span id="last-db-update" class="sync-value">대기 중...</span>
+        </div>
+        <div class="sync-divider"></div>
+        <div class="sync-item">
+            <span class="sync-label">BUILD:</span>
+            <span id="last-github-update" class="sync-value">확인 중...</span>
+        </div>
     </div>
 
     <div class="credit-title">[ 플랜비 캘린더팀 ]</div>
@@ -130,7 +145,7 @@
         <div id="step-list">
             <div id="schedule-list-area" class="list-group"></div>
             <button class="add-btn-large" onclick="goToInput('add')">+ 새로운 일정 추가</button>
-            <button class="close-modal" style="width:100%; padding:14px; border-radius:10px; border:none; cursor:pointer;" onclick="closeModal()">닫기</button>
+            <button class="close-modal" style="width:100%" onclick="closeModal()">닫기</button>
         </div>
         <div id="step-input" class="input-step">
             <select id="modalCategory" onchange="updateSelectColor(this)">
@@ -154,6 +169,7 @@
 </div>
 
 <script>
+    // --- Firebase 설정 ---
     const firebaseConfig = {
         apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
         authDomain: "planb-calender.firebaseapp.com",
@@ -171,26 +187,41 @@
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
 
-    function pad2(n) { return String(n).padStart(2, '0'); }
-    function makeDateKey(y, m, d) { return `${y}-${pad2(m)}-${pad2(d)}`; }
-    function normalizeKey(key) { const parts = String(key).split('-'); if (parts.length !== 3) return key; return `${parts[0]}-${pad2(parts[1])}-${pad2(parts[2])}`; }
-
-    // 업데이트 시간 표시 함수
+    // --- 시간 및 빌드 정보 로직 ---
     function refreshSyncTime() {
         const now = new Date();
-        document.getElementById('last-db-update').textContent = `Last Sync: ${now.getHours()}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('last-db-update').textContent = timeStr;
     }
 
-    async function fetchGit() {
+    async function fetchGitHubBuild() {
+        const repo = "Kapi-bara/planb-calendar"; 
         try {
-            const res = await fetch(`https://api.github.com/repos/Kapi-bara/planb-calendar/commits/main`);
+            const res = await fetch(`https://api.github.com/repos/${repo}/commits/main`);
             if (res.ok) {
                 const data = await res.json();
+                const msg = data.commit.message.split('\n')[0]; 
                 const d = new Date(data.commit.author.date);
-                document.getElementById('last-github-update').textContent = `System: ${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${pad2(d.getMinutes())}`;
+                const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
+                document.getElementById('last-github-update').textContent = `${dateStr} - ${msg}`;
             }
-        } catch(e) {}
+        } catch(e) { document.getElementById('last-github-update').textContent = "연동 실패"; }
     }
+
+    // --- 데이터 관리 ---
+    function autoSaveToServer(showMsg = false) {
+        db.ref(`monthly/${currentMember}`).set(monthData).then(() => {
+            refreshSyncTime();
+            if (showMsg) alert('저장되었습니다.');
+        });
+    }
+
+    function saveDataToServer() { autoSaveToServer(true); }
+
+    // --- 캘린더 로직 ---
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function makeDateKey(y, m, d) { return `${y}-${pad2(m)}-${pad2(d)}`; }
+    function normalizeKey(key) { const parts = String(key).split('-'); return `${parts[0]}-${pad2(parts[1])}-${pad2(parts[2])}`; }
 
     function renderCalendar() {
         const grid = document.getElementById('calendarGrid');
@@ -259,6 +290,7 @@
         });
     }
 
+    // --- 모달 로직 ---
     function openModal(key, date) {
         selectedDateKey = key;
         document.getElementById('modalDateTitle').textContent = `${currentMonth}월 ${date}일 일정 관리`;
@@ -309,24 +341,13 @@
         if(confirm('삭제하시겠습니까?')) {
             monthData[selectedDateKey].splice(i, 1);
             if(monthData[selectedDateKey].length === 0) delete monthData[selectedDateKey];
-            showScheduleList(); renderCalendar();
-            if(!monthData[selectedDateKey]) closeModal();
+            renderCalendar(); 
+            if(!monthData[selectedDateKey]) closeModal(); else showScheduleList();
             autoSaveToServer();
         }
     }
 
-    function deleteCurrentSchedule() {
-        deleteFromList(editIndex);
-    }
-
-    function autoSaveToServer(msg = false) {
-        db.ref(`monthly/${currentMember}`).set(monthData).then(() => {
-            refreshSyncTime();
-            if(msg) alert('저장되었습니다.');
-        });
-    }
-
-    function saveDataToServer() { autoSaveToServer(true); }
+    function deleteCurrentSchedule() { deleteFromList(editIndex); }
     function updateSelectColor(el) { el.style.color = el.options[el.selectedIndex].style.color || "#fff"; }
     function closeModal() { document.getElementById('scheduleModal').style.display = 'none'; }
     function backToList() { if(!monthData[selectedDateKey]) closeModal(); else showScheduleList(); }
@@ -341,7 +362,8 @@
     }
 
     loadData();
-    fetchGit();
+    fetchGitHubBuild();
+    refreshSyncTime();
 </script>
 </body>
 </html>
