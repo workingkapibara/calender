@@ -184,14 +184,14 @@
                     ice.textContent = '🧊';
                     container.appendChild(ice);
                 } else {
-                    num.style.color = isTrainee ? "#888" : "#fff";
+                    num.style.color = isTrainee ? "#333" : "#fff";
                     num.style.backgroundColor = categoryColors[firstSchedule.cat] || 'transparent';
                     
                     schedules.forEach((s, idx) => {
                         const item = document.createElement('div');
                         item.className = 'schedule-item';
                         item.style.backgroundColor = categoryColors[s.cat] || 'transparent';
-                        if (s.cat === "연습생일정") item.style.color = "#888";
+                        if (s.cat === "연습생일정") item.style.color = "#333";
                         if(idx > 0) item.style.borderTop = "1px solid rgba(255,255,255,0.1)";
                         item.textContent = s.text;
                         container.appendChild(item);
@@ -272,4 +272,5 @@
     loadData();
 </script>
 </body>
+
 </html>
