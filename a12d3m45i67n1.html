@@ -15,30 +15,14 @@
         }
         :root { --bg-color: #000; --card-bg: #111; --border: #222; --accent: #fff; --text-dim: #888; --today-border: #ff0000; --danger: #ff4d4d; }
         body { background-color: var(--bg-color); color: #fff; font-family: 'planb', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
-        /* 컨테이너 너비 및 패딩 고정 */
-        .container { 
-            width: 100%; 
-            max-width: 1050px; 
-            background: var(--card-bg); 
-            border-radius: 24px; 
-            padding: 50px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
-            margin-bottom: 30px; 
-            overflow: hidden; 
-            box-sizing: border-box; 
-        }
-
+        .container { width: 100%; max-width: 1050px; background: var(--card-bg); border-radius: 24px; padding: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); margin-bottom: 30px; overflow: hidden; box-sizing: border-box; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .title-group { display: flex; align-items: center; gap: 0; }
         .editable-title, .today-category, .today-date-text { font-size: 50px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
         .editable-title { margin-right: 15px; }
         .today-date-text { color: var(--accent); margin-right: 10px; }
         .today-category { color: var(--text-dim); }
-
-        /* 탭 컨테이너 중앙 정렬 복구 */
         .tab-container { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
-        
         .tab { padding: 10px 22px; background: #1a1a1a; border: 1px solid var(--border); border-radius: 50px; cursor: pointer; color: var(--text-dim); font-size: 14px; font-weight: bold; transition: 0.3s; }
         .tab.active { background: #fff; color: #000; border-color: #fff; }
         .month-controller { display: flex; align-items: center; gap: 15px; padding: 20px 0; border-top: 1px solid var(--border); margin-bottom: 25px; width: 100%; }
@@ -50,38 +34,21 @@
         .btn-img { background: #222; color: #fff; border: 1px solid var(--border); }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: var(--border); border: 1px solid var(--border); width: 100%; }
         .day-header { background: #0a0a0a; color: var(--text-dim); height: 50px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
-        
-        /* 셀 최소 높이 설정 */
         .day-cell { background: var(--card-bg); min-height: 140px; display: flex; flex-direction: column; cursor: pointer; position: relative; box-sizing: border-box; overflow: hidden; }
         .day-cell.today { border: 4px solid #ff0000 !important; z-index: 10; box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2); }
         .day-num { font-size: 14px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; }
         .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; position: relative; }
         .schedule-item { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 12px; font-size: 13px; line-height: 1.4; color: #fff; white-space: pre-wrap; word-break: break-all; font-weight: bold; }
         .ice-emoji-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); font-size: 50px; }
-        
         .notice-area { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 13px; line-height: 1.8; font-weight: bold; }
 
-        /* --- 하단 정보 바 (상하 배치로 변경) --- */
         .credit-area { width: 100%; max-width: 1050px; text-align: center; color: #666; font-size: 13px; margin-top: 20px; padding-bottom: 50px; }
-        .sync-status-bar { 
-            display: inline-flex; 
-            flex-direction: column; /* 세로 배치 */
-            align-items: flex-start; /* 왼쪽 정렬 */
-            gap: 8px; 
-            background: rgba(255,255,255,0.03); 
-            padding: 12px 20px; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            border: 1px solid #222;
-        }
+        .sync-status-bar { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.03); padding: 12px 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #222; }
         .sync-item { display: flex; align-items: center; gap: 10px; width: 100%; }
         .sync-label { color: #888; font-weight: bold; font-size: 11px; min-width: 75px; text-align: left; }
         .sync-value { color: #bbb; font-size: 11px; }
-        
-        .credit-title { font-weight: bold; color: #888; margin-bottom: 8px; }
-        .copyright { font-size: 11px; color: #444; margin-top: 15px; }
 
-        /* 모달 스타일 유지 */
+        /* 모달 디자인 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 30px; border-radius: 24px; width: 400px; border: 1px solid var(--border); max-height: 85vh; overflow-y: auto; }
         .list-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
@@ -140,27 +107,44 @@
 
 <div class="credit-area no-export">
     <div class="sync-status-bar">
-        <div class="sync-item">
-            <span class="sync-label">DATA SYNC</span>
-            <span id="last-db-update" class="sync-value">대기 중...</span>
-        </div>
-        <div class="sync-item">
-            <span class="sync-label">BUILD</span>
-            <span id="last-github-update" class="sync-value">확인 중...</span>
-        </div>
+        <div class="sync-item"><span class="sync-label">DATA SYNC</span><span id="last-db-update" class="sync-value">대기 중...</span></div>
+        <div class="sync-item"><span class="sync-label">BUILD</span><span id="last-github-update" class="sync-value">확인 중...</span></div>
     </div>
-
     <div class="credit-title">[ 플랜비 캘린더팀 ]</div>
     <div>제작자 - 카피바라, 리크, 김부동, 안즈, 이워리</div>
     <div>웹 디자인 - 카피바라 @workingkapibara</div>
-    <div class="copyright">
-        해당 제작물의 모든 권리는 원작자(카피바라)에게 있으며, <br>
-        플랜비 뮤직의 비공식 팬 제작물입니다.
+</div>
+
+<div class="modal" id="scheduleModal">
+    <div class="modal-content">
+        <h3 id="modalDateTitle" style="text-align:center; margin-top:0;">일정 관리</h3>
+        <div id="step-list">
+            <div id="schedule-list-area" class="list-group"></div>
+            <button class="add-btn-large" onclick="goToInput('add')">+ 새로운 일정 추가</button>
+            <button class="close-modal" style="width:100%" onclick="closeModal()">닫기</button>
+        </div>
+        <div id="step-input" class="input-step">
+            <select id="modalCategory" onchange="updateSelectColor(this)">
+                <option value="평뱅" style="color: #31982f;">● 평뱅</option>
+                <option value="짧뱅/비번/구플" style="color: #0070bf;">● 짧뱅/비번/구플</option>
+                <option value="합방/컨텐츠" style="color: #d98516;">● 합방/컨텐츠</option>
+                <option value="플랜비일정" style="color: #702ea0;">● 플랜비일정</option>
+                <option value="중요일정" style="color: #d63f6f;">● 중요일정</option>
+                <option value="빙하기" style="color: #87CEEB;">● 빙하기</option>
+                <option value="휴뱅" style="color: #404040;">● 휴뱅</option>
+                <option value="연습생일정" style="color: #ffd966;">● 연습생일정</option>
+            </select>
+            <textarea id="modalText" placeholder="내용을 입력하세요"></textarea>
+            <div class="modal-btns">
+                <button id="detail-del-btn" class="delete-detail-btn" onclick="deleteCurrentSchedule()">삭제</button>
+                <button class="save-modal" onclick="confirmSchedule()">적용</button>
+                <button class="close-modal" onclick="backToList()">취소</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- Firebase 설정 ---
     const firebaseConfig = {
         apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
         authDomain: "planb-calender.firebaseapp.com",
@@ -178,58 +162,143 @@
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
 
-    // --- 시간 및 빌드 정보 로직 (시간 포함 수정) ---
     function refreshSyncTime() {
         const now = new Date();
-        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        document.getElementById('last-db-update').textContent = timeStr;
+        document.getElementById('last-db-update').textContent = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     }
 
     async function fetchGitHubBuild() {
-        const repo = "workingkapibara/calender"; 
         try {
-            const res = await fetch(`https://api.github.com/repos/${repo}/commits/main`);
+            const res = await fetch(`https://api.github.com/repos/workingkapibara/calender/commits/main`);
             if (res.ok) {
                 const data = await res.json();
-                const msg = data.commit.message.split('\n')[0]; 
                 const d = new Date(data.commit.author.date);
-                
-                // 날짜(M/D)와 시간(HH:mm) 포맷팅
-                const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
-                const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                
-                document.getElementById('last-github-update').textContent = `${dateStr} ${timeStr} - ${msg}`;
+                document.getElementById('last-github-update').textContent = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} - ${data.commit.message.split('\n')[0]}`;
             }
         } catch(e) { document.getElementById('last-github-update').textContent = "연동 실패"; }
     }
 
-    // --- 이하 캘린더/저장 로직 (기존과 동일) ---
-    function autoSaveToServer(showMsg = false) {
-        db.ref(`monthly/${currentMember}`).set(monthData).then(() => {
-            refreshSyncTime();
-            if (showMsg) alert('저장되었습니다.');
-        });
-    }
-
-    function loadData() {
-        db.ref(`monthly/${currentMember}`).once('value', (s) => {
-            const raw = s.val() || {};
-            monthData = {};
-            Object.entries(raw).forEach(([k, v]) => { monthData[normalizeKey(k)] = Array.isArray(v) ? v : [v]; });
-            renderCalendar();
-        });
-    }
-
     function pad2(n) { return String(n).padStart(2, '0'); }
-    function normalizeKey(key) { const parts = String(key).split('-'); return `${parts[0]}-${pad2(parts[1])}-${pad2(parts[2])}`; }
     function makeDateKey(y, m, d) { return `${y}-${pad2(m)}-${pad2(d)}`; }
+    function normalizeKey(key) { const p = String(key).split('-'); return `${p[0]}-${pad2(p[1])}-${pad2(p[2])}`; }
 
-    // (renderCalendar, openModal 등 나머지 함수들 동일하게 유지)
-    // ...
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        document.getElementById('monthDisplay').textContent = `${currentYear}.${pad2(currentMonth)}`;
+        ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].forEach(d => grid.appendChild(Object.assign(document.createElement('div'), {className:'day-header', textContent:d})));
+        
+        const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+        const lastDate = new Date(currentYear, currentMonth, 0).getDate();
+        
+        for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), {className:'day-cell'}));
+        
+        for (let date = 1; date <= lastDate; date++) {
+            const key = makeDateKey(currentYear, currentMonth, date);
+            const cell = document.createElement('div'); cell.className = 'day-cell';
+            const num = document.createElement('div'); num.className = 'day-num'; num.textContent = date;
+            const container = document.createElement('div'); container.className = 'schedule-container';
+            const schedules = monthData[key] || [];
+            
+            if (schedules.length > 0) {
+                if (schedules[0].cat === "빙하기") {
+                    cell.style.backgroundColor = "#404040";
+                    container.innerHTML = `<div class="ice-emoji-box">🧊</div>`;
+                } else {
+                    num.style.backgroundColor = categoryColors[schedules[0].cat];
+                    num.style.color = schedules[0].cat === "연습생일정" ? "#333" : "#fff";
+                    schedules.forEach((s, idx) => {
+                        const div = document.createElement('div'); div.className = 'schedule-item';
+                        div.style.backgroundColor = categoryColors[s.cat];
+                        if (s.cat === "연습생일정") div.style.color = "#333";
+                        div.textContent = s.text;
+                        container.appendChild(div);
+                    });
+                }
+            }
+            if (currentYear === today.getFullYear() && currentMonth === (today.getMonth()+1) && date === today.getDate()) {
+                cell.classList.add('today');
+                updateTopUI(schedules[0]);
+            }
+            cell.onclick = () => openModal(key, date);
+            cell.append(num, container); grid.appendChild(cell);
+        }
+    }
 
-    loadData();
-    fetchGitHubBuild();
-    refreshSyncTime();
+    function updateTopUI(s) {
+        document.getElementById('top-date-display').textContent = `${today.getMonth()+1}/${today.getDate()} -`;
+        const cat = document.getElementById('top-today-cat');
+        if (s) { cat.textContent = `${s.cat} ${memberEmojis[currentMember]}`; cat.style.color = categoryColors[s.cat]; }
+        else { cat.textContent = "뱅온 미정"; cat.style.color = "var(--text-dim)"; }
+    }
+
+    function openModal(key, date) {
+        selectedDateKey = key;
+        document.getElementById('modalDateTitle').textContent = `${currentMonth}월 ${date}일 일정 관리`;
+        if (!(monthData[key] || []).length) goToInput('add');
+        else { showScheduleList(); document.getElementById('scheduleModal').style.display = 'flex'; }
+    }
+
+    function showScheduleList() {
+        const area = document.getElementById('schedule-list-area');
+        area.innerHTML = (monthData[selectedDateKey] || []).map((s, i) => `
+            <div class="list-item">
+                <button class="list-item-btn" onclick="goToInput('edit', ${i})">
+                    <strong style="color:${categoryColors[s.cat]}">${s.cat}</strong><span>${s.text}</span>
+                </button>
+                <button class="del-btn-small" onclick="deleteFromList(${i})">✕</button>
+            </div>`).join('');
+        document.getElementById('step-list').style.display = 'block';
+        document.getElementById('step-input').style.display = 'none';
+    }
+
+    function goToInput(mode, idx = -1) {
+        modalMode = mode; editIndex = idx;
+        document.getElementById('step-list').style.display = 'none';
+        document.getElementById('step-input').style.display = 'block';
+        const c = document.getElementById('modalCategory'), t = document.getElementById('modalText');
+        if (mode === 'edit') { const d = monthData[selectedDateKey][idx]; c.value = d.cat; t.value = d.text; }
+        else { c.value = "평뱅"; t.value = ""; }
+        updateSelectColor(c);
+        document.getElementById('scheduleModal').style.display = 'flex';
+    }
+
+    function confirmSchedule() {
+        const cat = document.getElementById('modalCategory').value, text = document.getElementById('modalText').value;
+        if (!monthData[selectedDateKey]) monthData[selectedDateKey] = [];
+        if (modalMode === 'add') monthData[selectedDateKey].push({cat, text});
+        else monthData[selectedDateKey][editIndex] = {cat, text};
+        renderCalendar(); closeModal(); autoSaveToServer();
+    }
+
+    function deleteFromList(i) {
+        if(confirm('삭제하시겠습니까?')) {
+            monthData[selectedDateKey].splice(i, 1);
+            if(!monthData[selectedDateKey].length) delete monthData[selectedDateKey];
+            renderCalendar(); if(!monthData[selectedDateKey]) closeModal(); else showScheduleList();
+            autoSaveToServer();
+        }
+    }
+
+    function deleteCurrentSchedule() { deleteFromList(editIndex); }
+    function autoSaveToServer(m = false) { db.ref(`monthly/${currentMember}`).set(monthData).then(() => { refreshSyncTime(); if(m) alert('저장!'); }); }
+    function saveDataToServer() { autoSaveToServer(true); }
+    function updateSelectColor(el) { el.style.color = el.options[el.selectedIndex].style.color; }
+    function closeModal() { document.getElementById('scheduleModal').style.display = 'none'; }
+    function backToList() { if(!monthData[selectedDateKey]) closeModal(); else showScheduleList(); }
+    function switchTab(n, el) { currentMember = n; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById('main-title').innerText = n + " |"; loadData(); }
+    function loadData() { db.ref(`monthly/${currentMember}`).once('value', s => { const raw = s.val() || {}; monthData = {}; Object.entries(raw).forEach(([k, v]) => { monthData[normalizeKey(k)] = Array.isArray(v) ? v : [v]; }); renderCalendar(); }); }
+    function changeMonth(d) { currentMonth += d; if (currentMonth > 12) { currentMonth = 1; currentYear++; } else if (currentMonth < 1) { currentMonth = 12; currentYear--; } loadData(); }
+
+    async function exportImage() {
+        document.body.classList.add('exporting');
+        const canvas = await html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: null, useCORS: true });
+        const link = document.createElement('a'); link.download = `PlanB_${currentMember}.png`;
+        link.href = canvas.toDataURL(); link.click();
+        document.body.classList.remove('exporting');
+    }
+
+    loadData(); fetchGitHubBuild(); refreshSyncTime();
 </script>
 </body>
 </html>
