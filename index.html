@@ -51,8 +51,23 @@
         
         /* cursor: default로 변경하여 클릭 불가임을 시각적으로 표현 */
         .day-cell { background: var(--card-bg); min-height: 140px; display: flex; flex-direction: column; cursor: default; position: relative; box-sizing: border-box; overflow: hidden; }
-        .day-cell.today { border: 2.5px solid var(--today-border) !important; z-index: 5; }
-        
+        /* 다른 셀에 영향을 주지 않는 오늘 날짜 강조 스타일 */
+        .day-cell.today {
+            /* 실제 테두리 대신 안쪽으로 그림자를 쏘아 레이아웃 밀림 방지 */
+        box-shadow: 
+        inset 0 0 0 4px #ff0000, /* 안쪽으로 4px 굵은 테두리 효과 */
+        0 0 15px rgba(255, 0, 0, 0.5); /* 바깥쪽으로 은은한 붉은 광채 */
+    
+        z-index: 10; /* 주변 셀보다 위로 올라오게 설정 */
+        position: relative;
+        border: none !important; /* 기존 테두리 제거하여 영향 차단 */
+        }
+
+        /* 오늘 날짜 숫자가 테두리에 너무 붙지 않게 조정 (필요 시) */
+        .day-cell.today .day-num {
+        padding-top: 12px;
+        padding-left: 14px;
+        }
         .day-num { font-size: 14px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; }
         .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; position: relative; }
         .schedule-item { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 12px; font-size: 13px; line-height: 1.4; color: #fff; white-space: pre-wrap; word-break: break-all; font-weight: bold; }
@@ -274,3 +289,4 @@
 </body>
 
 </html>
+
