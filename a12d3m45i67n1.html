@@ -8,7 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-        /* --- 기존 스타일 유지 --- */
         @font-face {
             font-family: 'planb';
             src: url('data:application/octet-stream;base64,T1RUTwAOAIAAAwBgQ0ZGIMIfBUQAAD3gAAb5yERTSUcAAAABAAkOxAAAAAhHU1VCLZKgnAAHN6gAAK5+T1MvMn13UPQAAAFQAAAAYFZPUkfRZ4yIAAfmKAAABChjbWFw1c4mjQAABZQAADgqaGVhZMAtWyYAAADsAAAANmhoZWEGwSgAAAABJAAAACRobXR4Om/30QAH6lAAAJIobWF4cCSKUAAAAAFIAAAABm5hbWUfnyFwAAABsAAAA+Jwb3N0/7gAMgAAPcAAAAAgdmhlYQZPNeoACHx4AAAAJHZtdHg6anN7AAh8nAAAkigAAQAAAAEZmuMf/3BfDzz1AAMD6AAAAAB8JZ3AAAAAAOGiYF7/bP70A...'); 
@@ -32,6 +31,7 @@
         .btn { padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; border: none; }
         .btn-save { background: #fff; color: #000; }
         .btn-img { background: #222; color: #fff; border: 1px solid var(--border); }
+        .btn-today { background: #ff0000; color: #fff; border: none; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: var(--border); border: 1px solid var(--border); width: 100%; }
         .day-header { background: #0a0a0a; color: var(--text-dim); height: 50px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
         .day-cell { background: var(--card-bg); min-height: 140px; display: flex; flex-direction: column; cursor: pointer; position: relative; box-sizing: border-box; overflow: hidden; }
@@ -56,7 +56,6 @@
         .sync-label { color: #888; font-weight: bold; font-size: 11px; min-width: 75px; text-align: left; }
         .sync-value { color: #bbb; font-size: 11px; }
 
-        /* 모달 디자인 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a1a; padding: 30px; border-radius: 24px; width: 400px; border: 1px solid var(--border); max-height: 85vh; overflow-y: auto; }
         .list-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
@@ -102,6 +101,7 @@
         <div class="btn-group">
             <button class="btn btn-save" onclick="saveDataToServer()">UPDATE</button>
             <button class="btn btn-img" onclick="exportImage()">IMAGE</button>
+            <button class="btn btn-today" onclick="goToday()">TODAY</button>
         </div>
     </div>
 
@@ -176,7 +176,6 @@
     const today = new Date();
     let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {}, selectedDateKey = "", modalMode = "add", editIndex = -1;
     
-    // 카테고리 색상 데이터에 '뱅온 미정' 추가 (색상은 흰색 지정)
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966", "뱅온 미정": "#ffffff" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
 
@@ -219,53 +218,80 @@
             const schedules = monthData[key] || [];
             
             if (schedules.length > 0) {
-                if (schedules[0].cat === "빙하기") {
+                const firstSchedule = schedules[0];
+                if (firstSchedule.cat === "빙하기") {
                     cell.style.backgroundColor = "#404040";
-                    container.innerHTML = `<div class="ice-emoji-box">🧊</div>`;
+                    num.style.color = "#fff";
+                    num.style.backgroundColor = "transparent";
+                    const ice = document.createElement('div');
+                    ice.className = 'ice-emoji-box';
+                    ice.textContent = '🧊';
+                    container.appendChild(ice);
                 } else {
-                    // 뱅온 미정이 아닐 때만 숫자 배경색 칠하기
-                    if (schedules[0].cat !== "뱅온 미정") {
-                        num.style.backgroundColor = categoryColors[schedules[0].cat];
-                        num.style.color = schedules[0].cat === "연습생일정" ? "#333" : "#fff";
+                    if (firstSchedule.cat !== "뱅온 미정") {
+                        num.style.backgroundColor = categoryColors[firstSchedule.cat];
+                        num.style.color = firstSchedule.cat === "연습생일정" ? "#333" : "#fff";
                     } else {
-                        num.style.color = "#666"; // 미정일 경우 기본 숫자 색상
+                        // 뱅온 미정일 때의 처리
+                        num.style.color = "#666";
+                        num.style.backgroundColor = "transparent";
                     }
 
                     schedules.forEach((s, idx) => {
                         const div = document.createElement('div'); div.className = 'schedule-item';
-                        // 뱅온 미정이 아닐 때만 아이템 배경색 칠하기
                         if (s.cat !== "뱅온 미정") {
                             div.style.backgroundColor = categoryColors[s.cat];
                             if (s.cat === "연습생일정") div.style.color = "#333";
                         } else {
-                            div.style.color = "#fff"; // 미정일 경우 글자만 흰색
+                            // 뱅온 미정 아이템 스타일
+                            div.style.color = "#fff";
+                            div.style.backgroundColor = "transparent";
                         }
+                        if(idx > 0) div.style.borderTop = "1px solid rgba(255,255,255,0.1)";
                         div.textContent = s.text;
                         container.appendChild(div);
                     });
                 }
+            } else {
+                num.style.color = '#666';
+                num.style.backgroundColor = "transparent";
             }
+
             if (currentYear === today.getFullYear() && currentMonth === (today.getMonth()+1) && date === today.getDate()) {
                 cell.classList.add('today');
-                updateTopUI(schedules[0]);
             }
             cell.onclick = () => openModal(key, date);
             cell.append(num, container); grid.appendChild(cell);
         }
     }
 
-    function updateTopUI(s) {
-        document.getElementById('top-date-display').textContent = `${today.getMonth()+1}/${today.getDate()} -`;
-        const cat = document.getElementById('top-today-cat');
+    function updateTopUI() {
+        const todayKey = makeDateKey(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        const s = monthData[todayKey] ? monthData[todayKey][0] : null;
+        
+        const elCat = document.getElementById('top-today-cat');
+        const elDate = document.getElementById('top-date-display');
+        elDate.textContent = `${today.getMonth()+1}/${today.getDate()} -`;
+        
         if (s) { 
-            cat.textContent = `${s.cat} ${memberEmojis[currentMember]}`; 
-            // 뱅온 미정이면 흰색, 아니면 지정된 색상 적용
-            cat.style.color = (s.cat === "뱅온 미정") ? "#fff" : categoryColors[s.cat]; 
+            const emoji = (s.cat === "빙하기") ? "🧊" : (memberEmojis[currentMember] || '');
+            elCat.textContent = `${s.cat} ${emoji}`; 
+            
+            if (s.cat === "뱅온 미정") {
+                elCat.style.color = "var(--text-dim)";
+            } else {
+                elCat.style.color = categoryColors[s.cat];
+            }
+        } else { 
+            elCat.textContent = "뱅온 미정"; 
+            elCat.style.color = "var(--text-dim)"; 
         }
-        else { 
-            cat.textContent = "뱅온 미정"; 
-            cat.style.color = "#fff"; 
-        }
+    }
+
+    function goToday() {
+        currentYear = today.getFullYear();
+        currentMonth = today.getMonth() + 1;
+        loadData();
     }
 
     function openModal(key, date) {
@@ -294,7 +320,7 @@
         document.getElementById('step-input').style.display = 'block';
         const c = document.getElementById('modalCategory'), t = document.getElementById('modalText');
         if (mode === 'edit') { const d = monthData[selectedDateKey][idx]; c.value = d.cat; t.value = d.text; }
-        else { c.value = "뱅온 미정"; t.value = ""; } // 기본값을 뱅온 미정으로 설정
+        else { c.value = "뱅온 미정"; t.value = ""; }
         updateSelectColor(c);
         document.getElementById('scheduleModal').style.display = 'flex';
     }
@@ -304,14 +330,14 @@
         if (!monthData[selectedDateKey]) monthData[selectedDateKey] = [];
         if (modalMode === 'add') monthData[selectedDateKey].push({cat, text});
         else monthData[selectedDateKey][editIndex] = {cat, text};
-        renderCalendar(); closeModal(); autoSaveToServer();
+        renderCalendar(); updateTopUI(); closeModal(); autoSaveToServer();
     }
 
     function deleteFromList(i) {
         if(confirm('삭제하시겠습니까?')) {
             monthData[selectedDateKey].splice(i, 1);
             if(!monthData[selectedDateKey].length) delete monthData[selectedDateKey];
-            renderCalendar(); if(!monthData[selectedDateKey]) closeModal(); else showScheduleList();
+            renderCalendar(); updateTopUI(); if(!monthData[selectedDateKey]) closeModal(); else showScheduleList();
             autoSaveToServer();
         }
     }
@@ -322,8 +348,27 @@
     function updateSelectColor(el) { el.style.color = el.options[el.selectedIndex].style.color; }
     function closeModal() { document.getElementById('scheduleModal').style.display = 'none'; }
     function backToList() { if(!monthData[selectedDateKey]) closeModal(); else showScheduleList(); }
-    function switchTab(n, el) { currentMember = n; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById('main-title').innerText = n + " |"; loadData(); }
-    function loadData() { db.ref(`monthly/${currentMember}`).once('value', s => { const raw = s.val() || {}; monthData = {}; Object.entries(raw).forEach(([k, v]) => { monthData[normalizeKey(k)] = Array.isArray(v) ? v : [v]; }); renderCalendar(); }); }
+    
+    function switchTab(n, el) { 
+        currentMember = n; 
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); 
+        el.classList.add('active'); 
+        document.getElementById('main-title').innerText = n + " |"; 
+        loadData(); 
+    }
+
+    function loadData() { 
+        db.ref(`monthly/${currentMember}`).once('value', s => { 
+            const raw = s.val() || {}; 
+            monthData = {}; 
+            Object.entries(raw).forEach(([k, v]) => { 
+                monthData[normalizeKey(k)] = Array.isArray(v) ? v : [v]; 
+            }); 
+            renderCalendar(); 
+            updateTopUI(); 
+        }); 
+    }
+
     function changeMonth(d) { currentMonth += d; if (currentMonth > 12) { currentMonth = 1; currentYear++; } else if (currentMonth < 1) { currentMonth = 12; currentYear--; } loadData(); }
 
     async function exportImage() {
