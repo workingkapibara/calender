@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
+        /* --- [복구] 폰트 데이터 및 기본 스타일 --- */
         @font-face {
             font-family: 'planb';
             src: url('data:application/octet-stream;base64,T1RUTwAOAIAAAwBgQ0ZGIMIfBUQAAD3gAAb5yERTSUcAAAABAAkOxAAAAAhHU1VCLZKgnAAHN6gAAK5+T1MvMn13UPQAAAFQAAAAYFZPUkfRZ4yIAAfmKAAABChjbWFw1c4mjQAABZQAADgqaGVhZMAtWyYAAADsAAAANmhoZWEGwSgAAAABJAAAACRobXR4Om/30QAH6lAAAJIobWF4cCSKUAAAAAFIAAAABm5hbWUfnyFwAAABsAAAA+Jwb3N0/7gAMgAAPcAAAAAgdmhlYQZPNeoACHx4AAAAJHZtdHg6anN7AAh8nAAAkigAAQAAAAEZmuMf/3BfDzz1AAMD6AAAAAB8JZ3AAAAAAOGiYF7/bP70A...'); 
@@ -34,11 +35,9 @@
             border: 4px solid #ff0000 !important; 
             z-index: 10; 
             box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2), 0 0 15px rgba(255, 0, 0, 0.4); 
-            position: relative;
         }
-        .day-cell.today .day-num { padding-top: 12px; padding-left: 14px; }
         .day-num { font-size: 14px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; }
-        .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; position: relative; }
+        .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; }
         .schedule-item { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 12px; font-size: 13px; line-height: 1.4; color: #fff; white-space: pre-wrap; word-break: break-all; font-weight: bold; }
         .ice-emoji-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); font-size: 50px; }
         .notice-area { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 13px; line-height: 1.8; font-weight: bold; }
@@ -88,6 +87,7 @@
 </div>
 
 <script>
+    /* --- [복구] Firebase 설정 --- */
     const firebaseConfig = {
         apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
         authDomain: "planb-calender.firebaseapp.com",
@@ -103,7 +103,7 @@
     const today = new Date();
     let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {};
     
-    // 카테고리 색상 데이터에 '뱅온 미정' 추가
+    // 카테고리 색상 데이터 (뱅온 미정 포함)
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966", "뱅온 미정": "#ffffff" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
 
@@ -135,22 +135,21 @@
                     cell.style.backgroundColor = "#404040";
                     container.innerHTML = `<div class="ice-emoji-box">🧊</div>`;
                 } else {
-                    // 뱅온 미정이 아닐 때만 숫자 배경색 적용
                     if (schedules[0].cat !== "뱅온 미정") {
                         num.style.backgroundColor = categoryColors[schedules[0].cat];
                         num.style.color = schedules[0].cat === "연습생일정" ? "#333" : "#fff";
+                        num.style.borderRadius = "4px";
                     } else {
-                        num.style.color = "#666";
+                        num.style.color = "#666"; 
                     }
 
                     schedules.forEach((s) => {
                         const div = document.createElement('div'); div.className = 'schedule-item';
-                        // 뱅온 미정이 아닐 때만 아이템 배경색 적용
                         if (s.cat !== "뱅온 미정") {
                             div.style.backgroundColor = categoryColors[s.cat];
                             if (s.cat === "연습생일정") div.style.color = "#333";
                         } else {
-                            div.style.color = "#fff";
+                            div.style.color = "#fff"; // 뱅온 미정은 글자만 흰색
                         }
                         div.textContent = s.text;
                         container.appendChild(div);
@@ -170,7 +169,6 @@
         const cat = document.getElementById('top-today-cat');
         if (s) { 
             cat.textContent = `${s.cat} ${memberEmojis[currentMember]}`; 
-            // 뱅온 미정이면 흰색, 아니면 지정 색상
             cat.style.color = (s.cat === "뱅온 미정") ? "#fff" : categoryColors[s.cat]; 
         } else {
             cat.textContent = "뱅온 미정";
