@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanB Music - Update History</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        @font-face {
+            font-family: 'planb';
+            src: url('data:application/octet-stream;base64,T1RUTwAOAIAAAwBgQ0ZGIMIfBUQAAD3gAAb5yERTSUcAAAABAAkOxAAAAAhHU1VCLZKgnAAHN6gAAK5+T1MvMn13UPQAAAFQAAAAYFZPUkfRZ4yIAAfmKAAABChjbWFw1c4mjQAABZQAADgqaGVhZMAtWyYAAADsAAAANmhoZWEGwSgAAAABJAAAACRobXR4Om/30QAH6lAAAJIobWF4cCSKUAAAAAFIAAAABm5hbWUfnyFwAAABsAAAA+Jwb3N0/7gAMgAAPcAAAAAgdmhlYQZPNeoACHx4AAAAJHZtdHg6anN7AAh8nAAAkigAAQAAAAEZmuMf/3BfDzz1AAMD6AAAAAB8JZ3AAAAAAOGiYF7/bP70A...'); 
+        }
+
+        :root {
+            --bg-color: #000;
+            --card-bg: #111;
+            --border: #222;
+            --accent: #fff;
+            --text-dim: #888;
+            --danger: #ff4d4d;
+            --point: #4d94ff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'planb', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { width: 100%; max-width: 950px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 { font-size: 32px; letter-spacing: -2px; margin: 0; }
+        .btn-home { text-decoration: none; color: var(--text-dim); font-size: 14px; border: 1px solid var(--border); padding: 8px 16px; border-radius: 50px; transition: 0.3s; }
+        .btn-home:hover { background: #fff; color: #000; }
+
+        /* 입력 섹션: 가로 배치 및 세로 자동 확장 */
+        .input-section-row {
+            display: flex;
+            gap: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 50px;
+            align-items: flex-end; /* 내용이 길어질 때 버튼이 하단에 정렬 */
+        }
+
+        .input-section-row textarea {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            resize: none;
+            min-height: 45px;
+            max-height: 600px;
+            font-family: inherit;
+            box-sizing: border-box;
+            overflow-y: hidden; /* 자동 확장을 위해 스크롤 숨김 */
+            line-height: 1.5;
+            display: block;
+        }
+
+        .btn-add-small {
+            width: 100px;
+            height: 45px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        /* 히스토리 리스트 레이아웃 */
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 20px 10px;
+            border-bottom: 1px solid var(--border);
+            gap: 25px;
+        }
+
+        .item-date {
+            min-width: 140px;
+            color: var(--point);
+            font-size: 13px;
+            font-weight: bold;
+            padding-top: 3px;
+        }
+
+        .item-content {
+            flex: 1;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #eee;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            min-width: 110px;
+            justify-content: flex-end;
+        }
+
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .btn-edit { background: #222; color: #fff; border: 1px solid #333; }
+        .btn-del { background: transparent; color: var(--danger); border: 1px solid rgba(255, 77, 77, 0.2); }
+
+        /* 수정 모달 */
+        #edit-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-body {
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-body label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 8px; margin-top: 15px; }
+        .modal-body input, .modal-body textarea {
+            width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; font-family: inherit; box-sizing: border-box;
+        }
+        .modal-body textarea { resize: none; overflow-y: hidden; min-height: 100px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>UPDATE HISTORY</h1>
+        <a href="dashboard.html" class="btn-home">BACK TO HOME</a>
+    </div>
+
+    <div class="input-section-row">
+        <textarea id="newHistory" 
+                  placeholder="새로운 업데이트 내용을 입력하세요..." 
+                  oninput="autoResize(this)"></textarea>
+        <button class="btn-add-small" onclick="saveHistory()">추가</button>
+    </div>
+
+    <div class="history-list" id="historyContainer">
+        <p style="text-align:center; color: #444;">데이터 로드 중...</p>
+    </div>
+</div>
+
+<div id="edit-overlay">
+    <div class="modal-body">
+        <h3 style="margin:0 0 20px 0; color: var(--point);">내역 수정</h3>
+        
+        <label>표시 날짜 (초 제외)</label>
+        <input type="text" id="editDate" placeholder="YYYY.MM.DD HH:MM">
+        
+        <label>업데이트 내용</label>
+        <textarea id="editHistoryText" oninput="autoResize(this)"></textarea>
+        
+        <div style="display:flex; gap:10px; margin-top:25px;">
+            <button class="btn-add-small" style="flex:1; width:auto;" onclick="updateConfirm()">수정완료</button>
+            <button class="btn-add-small" style="flex:1; width:auto; background:#333; color:#fff;" onclick="closeEdit()">취소</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Firebase 설정
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
+        authDomain: "planb-calender.firebaseapp.com",
+        databaseURL: "https://planb-calender-default-rtdb.firebaseio.com",
+        projectId: "planb-calender",
+        storageBucket: "planb-calender.firebasestorage.app",
+        messagingSenderId: "990002341913",
+        appId: "1:990002341913:web:9fb6b9875c89a012742288"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let editingKey = null;
+
+    // 높이 자동 조절 함수 (scrollHeight 기반)
+    function autoResize(textarea) {
+        textarea.style.height = '1px'; // 순간적으로 줄여야 scrollHeight가 정확히 계산됨
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+
+    // 데이터 불러오기 및 최신순 정렬 (order 타임스탬프 기준)
+    db.ref('system_history').on('value', (snapshot) => {
+        const container = document.getElementById('historyContainer');
+        container.innerHTML = "";
+        const data = snapshot.val();
+
+        if (!data) {
+            container.innerHTML = "<p style='color:#444; text-align:center;'>기록된 내역이 없습니다.</p>";
+            return;
+        }
+
+        const sortedItems = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })).sort((a, b) => (b.order || 0) - (a.order || 0));
+
+        sortedItems.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div class="item-date">${item.date}</div>
+                <div class="item-content">${item.text}</div>
+                <div class="item-actions">
+                    <button class="btn-sm btn-edit" onclick="openEdit('${item.id}', '${item.date}', \`${item.text}\`)">수정</button>
+                    <button class="btn-sm btn-del" onclick="deleteHistory('${item.id}')">삭제</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    });
+
+    // 신규 내역 저장
+    function saveHistory() {
+        const textarea = document.getElementById('newHistory');
+        const text = textarea.value.trim();
+        if (!text) return;
+
+        const now = new Date();
+        const displayTime = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        const orderTime = now.getTime(); // 밀리초 단위 정렬값
+
+        db.ref('system_history').push({
+            date: displayTime,
+            order: orderTime,
+            text: text
+        }).then(() => {
+            textarea.value = "";
+            textarea.style.height = '45px'; // 입력창 초기화
+        });
+    }
+
+    // 수정 모달 제어
+    function openEdit(key, date, text) {
+        editingKey = key;
+        const dateInput = document.getElementById('editDate');
+        const textInput = document.getElementById('editHistoryText');
+        dateInput.value = date;
+        textInput.value = text;
+        
+        document.getElementById('edit-overlay').style.display = 'flex';
+        // 모달 데이터 로드 후 높이 자동 맞춤
+        setTimeout(() => autoResize(textInput), 50);
+    }
+
+    function closeEdit() {
+        document.getElementById('edit-overlay').style.display = 'none';
+        editingKey = null;
+    }
+
+    // 데이터 수정 완료
+    function updateConfirm() {
+        const newDate = document.getElementById('editDate').value.trim();
+        const newText = document.getElementById('editHistoryText').value.trim();
+        
+        if(!newDate || !newText) return;
+
+        // 수정된 날짜 문자열을 다시 타임스탬프로 변환 (정렬 유지용)
+        const parts = newDate.replace(/\./g, '-').split(' ');
+        const parsedOrder = new Date(parts[0] + 'T' + parts[1] + ':00').getTime();
+
+        db.ref(`system_history/${editingKey}`).update({
+            date: newDate,
+            text: newText,
+            order: parsedOrder || Date.now()
+        }).then(() => {
+            closeEdit();
+        });
+    }
+
+    // 데이터 삭제
+    function deleteHistory(key) {
+        if (confirm("이 내역을 영구히 삭제하시겠습니까?")) {
+            db.ref(`system_history/${key}`).remove();
+        }
+    }
+</script>
+
+</body>
+</html>
