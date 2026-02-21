@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanB Music - System Dashboard</title>
+    <style>
+        @font-face {
+            font-family: 'planb';
+            src: url('data:application/octet-stream;base64,T1RUTwAOAIAAAwBgQ0ZGIMIfBUQAAD3gAAb5yERTSUcAAAABAAkOxAAAAAhHU1VCLZKgnAAHN6gAAK5+T1MvMn13UPQAAAFQAAAAYFZPUkfRZ4yIAAfmKAAABChjbWFw1c4mjQAABZQAADgqaGVhZMAtWyYAAADsAAAANmhoZWEGwSgAAAABJAAAACRobXR4Om/30QAH6lAAAJIobWF4cCSKUAAAAAFIAAAABm5hbWUfnyFwAAABsAAAA+Jwb3N0/7gAMgAAPcAAAAAgdmhlYQZPNeoACHx4AAAAJHZtdHg6anN7AAh8nAAAkigAAQAAAAEZmuMf/3BfDzz1AAMD6AAAAAB8JZ3AAAAAAOGiYF7/bP70A...'); 
+        }
+
+        :root {
+            --bg-color: #000;
+            --card-bg: #111;
+            --border: #222;
+            --accent: #fff;
+            --text-dim: #888;
+            --danger: #ff4d4d;
+            --history: #4d94ff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'planb', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 900px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header-section {
+            margin-bottom: 60px;
+        }
+
+        .header-section img {
+            width: 150px;
+            height: auto;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .header-section h1 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin: 0;
+            color: var(--accent);
+        }
+
+        .header-section p {
+            color: var(--text-dim);
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* 2x2 그리드 설정 */
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 40px 20px;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .icon-box {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .nav-card h2 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+            letter-spacing: -1px;
+        }
+
+        .nav-card p {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* 관리자용 커스텀 스타일 */
+        .admin-card:hover {
+            border-color: var(--danger);
+            box-shadow: 0 15px 30px rgba(255, 77, 77, 0.1);
+        }
+
+        /* 히스토리용 커스텀 스타일 */
+        .history-card:hover {
+            border-color: var(--history);
+            box-shadow: 0 15px 30px rgba(77, 148, 255, 0.1);
+        }
+
+        /* 빈 버튼 스타일 */
+        .empty-card {
+            cursor: default;
+            opacity: 0.5;
+        }
+        .empty-card:hover {
+            transform: none;
+            border-color: var(--border);
+            box-shadow: none;
+        }
+
+        @media (max-width: 650px) {
+            .menu-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <div class="header-section">
+        <img src="logo.png" alt="PlanB Logo">
+        <h1>SCHEDULER SYSTEM</h1>
+        <p>플랜비 뮤직 스케줄러 통합 관리 시스템</p>
+    </div>
+
+    <div class="menu-container">
+        <a href="index.html" class="nav-card">
+            <div class="icon-box">📅</div>
+            <h2>CALENDAR</h2>
+            <p>멤버별 방송 일정 확인 및 이미지 저장</p>
+        </a>
+
+        <a href="a12d3m45i67n1.html" class="nav-card admin-card">
+            <div class="icon-box">⚙️</div>
+            <h2>MANAGER</h2>
+            <p>데이터베이스 스케줄 실시간 관리</p>
+        </a>
+
+        <a href="history.html" class="nav-card history-card">
+            <div class="icon-box">📜</div>
+            <h2>UPDATE HISTORY</h2>
+            <p>시스템 업데이트 및 변경 내역 확인</p>
+        </a>
+
+        <div class="nav-card empty-card">
+            <div class="icon-box">🔒</div>
+            <h2>COMING SOON</h2>
+            <p>준비 중인 기능입니다.</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 60px; color: #333; font-size: 11px; letter-spacing: 1px;">
+        © PLANB MUSIC CALENDAR TEAM
+    </div>
+</div>
+
+</body>
+</html>
