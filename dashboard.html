@@ -29,12 +29,14 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            flex-direction: column; /* 크레딧 정렬을 위해 추가 */
+            padding: 40px 0;
         }
 
         .dashboard-wrapper {
             width: 100%;
             max-width: 900px;
-            padding: 40px 20px;
+            padding: 0 20px;
             text-align: center;
         }
 
@@ -63,7 +65,6 @@
             margin-top: 10px;
         }
 
-        /* 2x2 그리드 설정 */
         .menu-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -109,33 +110,21 @@
             line-height: 1.5;
         }
 
-        /* 관리자용 커스텀 스타일 */
-        .admin-card:hover {
-            border-color: var(--danger);
-            box-shadow: 0 15px 30px rgba(255, 77, 77, 0.1);
-        }
+        .admin-card:hover { border-color: var(--danger); box-shadow: 0 15px 30px rgba(255, 77, 77, 0.1); }
+        .history-card:hover { border-color: var(--history); box-shadow: 0 15px 30px rgba(77, 148, 255, 0.1); }
+        .empty-card { cursor: default; opacity: 0.5; }
 
-        /* 히스토리용 커스텀 스타일 */
-        .history-card:hover {
-            border-color: var(--history);
-            box-shadow: 0 15px 30px rgba(77, 148, 255, 0.1);
-        }
-
-        /* 빈 버튼 스타일 */
-        .empty-card {
-            cursor: default;
-            opacity: 0.5;
-        }
-        .empty-card:hover {
-            transform: none;
-            border-color: var(--border);
-            box-shadow: none;
-        }
+        /* 크레딧 영역 스타일 추가 */
+        .credit-area { width: 100%; max-width: 900px; text-align: center; color: #666; font-size: 13px; line-height: 1.8; margin-top: 60px; }
+        .credit-title { font-weight: bold; color: #888; margin-bottom: 8px; }
+        .copyright { font-size: 11px; color: #444; margin-top: 15px; }
+        .sync-status-bar { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.03); padding: 12px 20px; border-radius: 12px; margin-top: 25px; border: 1px solid #222; text-align: left; }
+        .sync-item { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .sync-label { color: #888; font-weight: bold; font-size: 11px; min-width: 75px; }
+        .sync-value { color: #bbb; font-size: 11px; }
 
         @media (max-width: 650px) {
-            .menu-container {
-                grid-template-columns: 1fr;
-            }
+            .menu-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -145,20 +134,20 @@
     <div class="header-section">
         <img src="logo.png" alt="PlanB Logo">
         <h1>SCHEDULER SYSTEM</h1>
-        <p>플랜비 뮤직 스케줄러 통합 관리 시스템</p>
+        <p>플랜비 뮤직 캘린더 통합 관리 시스템</p>
     </div>
 
     <div class="menu-container">
         <a href="index.html" class="nav-card">
             <div class="icon-box">📅</div>
             <h2>CALENDAR</h2>
-            <p>멤버별 방송 일정 확인 및 이미지 저장</p>
+            <p>멤버별 방송 일정 확인</p>
         </a>
 
         <a href="a12d3m45i67n1.html" class="nav-card admin-card">
             <div class="icon-box">⚙️</div>
             <h2>MANAGER</h2>
-            <p>데이터베이스 스케줄 실시간 관리</p>
+            <p>데이터베이스 스케줄 실시간 관리 및 이미지 저장</p>
         </a>
 
         <a href="history.html" class="nav-card history-card">
@@ -173,11 +162,17 @@
             <p>준비 중인 기능입니다.</p>
         </div>
     </div>
-
-    <div style="margin-top: 60px; color: #333; font-size: 11px; letter-spacing: 1px;">
-        © PLANB MUSIC CALENDAR TEAM
-    </div>
 </div>
 
+<div class="credit-area">
+    <div class="copyright">
+        해당 제작물의 모든 권리는 원작자(카피바라)에게 있으며, <br>
+        플랜비 뮤직의 비공식 팬 제작물입니다. <br>
+        버그 및 수정사항 제보 - working.kapibara@gmail.com
+    </div>
+</div>
+<div style="margin-top: 60px; color: #333; font-size: 12px; letter-spacing: 1px;">
+        © PLANB MUSIC CALENDAR TEAM
+    </div>
 </body>
 </html>
