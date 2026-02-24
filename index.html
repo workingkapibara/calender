@@ -66,7 +66,7 @@
             padding-top: 12px;
             padding-left: 14px;
         }
-        .day-num { font-size: 14px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; }
+        .day-num { font-size: 18px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; width: 100%; box-sizing: border-box; }
         .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; position: relative; }
         .schedule-item { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 12px; font-size: 13px; line-height: 1.4; color: #fff; white-space: pre-wrap; word-break: break-all; font-weight: bold; }
 
@@ -78,6 +78,40 @@
         .copyright { font-size: 11px; color: #444; margin-top: 15px; }
 
         .exporting .no-export { display: none !important; }
+
+        /* VOD 관련 스타일 */
+        .day-num { position: relative; display: flex; align-items: center; }
+        .vod-indicator {
+            position: absolute; top: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 14px 14px 0;
+            border-color: transparent currentColor transparent transparent;
+            z-index: 3;
+        }
+        .day-num.has-vod {
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .day-num.has-vod:hover { opacity: 0.7; }
+
+        /* VOD 선택 모달 */
+        .vod-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
+        .vod-modal-content { background: #1a1a1a; padding: 28px; border-radius: 20px; width: 340px; border: 1px solid #333; max-height: 80vh; overflow-y: auto; }
+        .vod-modal-title { text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 18px; color: #fff; }
+        .vod-modal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+        .vod-modal-item {
+            width: 100%; padding: 14px 18px; background: #111; border: 1px solid #333;
+            border-radius: 12px; color: #fff; cursor: pointer; font-family: inherit;
+            font-size: 14px; font-weight: bold; text-align: left;
+            transition: background 0.15s;
+        }
+        .vod-modal-item:hover { background: #222; }
+        .vod-modal-close {
+            width: 100%; padding: 12px; background: #333; color: #aaa;
+            border: none; border-radius: 10px; cursor: pointer;
+            font-family: inherit; font-size: 13px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -123,14 +157,23 @@
     <div class="copyright">
         해당 제작물의 모든 권리는 원작자(카피바라)에게 있으며, <br>
         플랜비 뮤직의 비공식 팬 제작물입니다. <br>
-        버그 및 수정사항 제보 - working.kapibara@gmail.com
+        버그 및 수정사항 제보 - <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="63140c11080a0d044d0802130a0102110223040e020a0f4d000c0e">[email&#160;protected]</a>
     </div>
     <div style="margin-top: 20px;">
         <img src="logo.png" alt="PlanB Logo" style="width: 120px; height: auto; opacity: 0.8;">
     </div>
 </div>
 
-<script>
+<!-- VOD 선택 모달 -->
+<div class="vod-modal" id="vodModal">
+    <div class="vod-modal-content">
+        <div class="vod-modal-title" id="vodModalTitle">📺 다시보기 선택</div>
+        <div class="vod-modal-list" id="vodModalList"></div>
+        <button class="vod-modal-close" onclick="closeVodModal()">닫기</button>
+    </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     const firebaseConfig = {
         apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
         authDomain: "planb-calender.firebaseapp.com",
@@ -144,9 +187,19 @@
     const db = firebase.database();
     
     const today = new Date();
-    let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {};
+    let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {}, vodData = {};
     
     // '뱅온 미정' 색상 추가 반영
+    const memberChannelIds = {
+        '빕어': 'bver99', '한세긴': 'rose0957', '나비': 'navixx', '송밤': 's07o24', '크앙희': '9wang2'
+    };
+    function makeAutoVodUrl(member, dateKey) {
+        const id = memberChannelIds[member];
+        if (!id || !dateKey) return '';
+        const d = dateKey.replace(/-/g, '');
+        return `https://www.sooplive.co.kr/station/${id}/vod?keyword=&period=directInput&startDate=${d}&endDate=${d}`;
+    }
+
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966", "뱅온 미정": "#ffffff" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
 
@@ -234,8 +287,41 @@
             if (currentYear === today.getFullYear() && currentMonth === (today.getMonth() + 1) && date === today.getDate()) {
                 cell.classList.add('today');
             }
-            
-            cell.append(num, container); 
+
+            // VOD 아이콘 표시 조건:
+            // 1. 오늘 이전 날짜만 (오늘 포함 X)
+            // 2. 휴뱅 카테고리면 수동 저장된 VOD 있을 때만
+            const cellDate = new Date(currentYear, currentMonth - 1, date);
+            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const isPast = cellDate < todayMidnight;
+            const isHyubang = schedules.length > 0 && schedules[0].cat === '휴뱅';
+            const isNoBang = schedules.length === 0 || schedules[0].cat === '뱅온 미정';
+            const hasCustomVod = (vodData[key] || []).length > 0;
+            const showVodIcon = isPast && !isNoBang && (!isHyubang || hasCustomVod);
+
+            cell.append(num, container);
+
+            if (showVodIcon) {
+                num.classList.add('has-vod');
+                const vodIcon = document.createElement('span');
+                vodIcon.className = 'vod-indicator';
+                vodIcon.textContent = '';
+                // 삼각형 색상 = 날짜 숫자 글씨 색
+                vodIcon.style.color = num.style.color || '#666';
+                cell.appendChild(vodIcon);
+                num.style.cursor = 'pointer';
+                num.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const savedVods = vodData[key] || [];
+                    openVodModal(key, date, savedVods);
+                });
+                vodIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const savedVods = vodData[key] || [];
+                    openVodModal(key, date, savedVods);
+                });
+            }
+
             grid.appendChild(cell);
         }
         updateTopUI(); 
@@ -277,15 +363,48 @@
         db.ref(`monthly/${currentMember}`).once('value', (s) => {
             const raw = s.val() || {};
             const normalized = {};
-
             Object.entries(raw).forEach(([k, v]) => {
                 const nk = normalizeKey(k);
                 normalized[nk] = normalizeSchedules(v);
             });
-
             monthData = normalized;
-            renderCalendar();
+
+            // VOD 데이터도 함께 로드
+            db.ref(`vod/${currentMember}`).once('value', (vs) => {
+                const rawVod = vs.val() || {};
+                vodData = {};
+                Object.entries(rawVod).forEach(([k, v]) => {
+                    vodData[normalizeKey(k)] = Array.isArray(v) ? v : [v];
+                });
+                renderCalendar();
+            });
         });
+    }
+
+    function openVodModal(key, date, savedVods) {
+        const autoUrl = makeAutoVodUrl(currentMember, key);
+        // 저장된 VOD가 없으면 자동 링크로 바로 이동
+        if (savedVods.length === 0) {
+            window.open(autoUrl, '_blank');
+            return;
+        }
+        // 저장된 VOD가 1개면 바로 이동
+        if (savedVods.length === 1) {
+            window.open(savedVods[0].url, '_blank');
+            return;
+        }
+        // 여러 개면 선택 팝업
+        document.getElementById('vodModalTitle').textContent = `📺 ${currentMonth}월 ${date}일 다시보기`;
+        const list = document.getElementById('vodModalList');
+        list.innerHTML = savedVods.map(v => `
+            <button class="vod-modal-item" onclick="window.open('${v.url}', '_blank'); closeVodModal();">
+                📺 ${v.label || '다시보기'}
+            </button>`).join('');
+        document.getElementById('vodModal').style.display = 'flex';
+    }
+
+    function closeVodModal() {
+        document.getElementById('vodModal').style.display = 'none';
     }
 
     function changeMonth(d) { currentMonth += d; if (currentMonth > 12) { currentMonth = 1; currentYear++; } else if (currentMonth < 1) { currentMonth = 12; currentYear--; } loadData(); }
@@ -296,26 +415,8 @@
         loadData();
     }
 
-    /* 이미지 내보내기 함수 주석 처리 
-    async function exportImage() { 
-        document.body.classList.add('exporting');
-        const captureArea = document.getElementById('capture-area'); 
-        const canvas = await html2canvas(captureArea, { 
-            scale: 2, 
-            backgroundColor: null, 
-            useCORS: true,
-            logging: false
-        }); 
-        const link = document.createElement('a'); 
-        link.download = `PlanB_${currentMember}.png`; 
-        link.href = canvas.toDataURL("image/png"); 
-        link.click(); 
-        document.body.classList.remove('exporting');
-    }
-    */
+    // 초기 데이터 로드
     loadData();
 </script>
 </body>
 </html>
-
-
