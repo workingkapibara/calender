@@ -42,7 +42,7 @@
             position: relative;
         }
         .day-cell.today .day-num { padding-top: 12px; padding-left: 14px; }
-        .day-num { font-size: 14px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; }
+        .day-num { font-size: 18px; color: #666; padding: 10px 12px; font-weight: bold; z-index: 2; width: 100%; box-sizing: border-box; }
         .schedule-container { flex-grow: 1; display: flex; flex-direction: column; z-index: 1; position: relative; }
         .schedule-item { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px 12px; font-size: 13px; line-height: 1.4; color: #fff; white-space: pre-wrap; word-break: break-all; font-weight: bold; }
         .ice-emoji-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); font-size: 50px; }
@@ -73,6 +73,52 @@
         .delete-detail-btn { background: var(--danger) !important; color: #fff !important; }
 
         .exporting .no-export { display: none !important; }
+
+        /* VOD 관련 스타일 */
+        .day-num { position: relative; }
+        .vod-indicator {
+            position: absolute; top: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 14px 14px 0;
+            border-color: transparent currentColor transparent transparent;
+            z-index: 3;
+        }
+        .day-num.has-vod { cursor: pointer; }
+        .day-num.has-vod:hover { opacity: 0.75; }
+
+        .vod-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        .vod-section-title {
+            font-size: 12px; color: #888; font-weight: bold; margin-bottom: 10px;
+        }
+        .vod-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .vod-item {
+            background: #1a1a1a; border: 1px solid #333; border-radius: 10px;
+            display: flex; align-items: center; overflow: hidden;
+        }
+        .vod-item-label {
+            flex: 1; padding: 10px 14px; font-size: 12px; color: #bbb;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            cursor: pointer; text-align: left; background: none; border: none;
+            font-family: inherit; font-weight: bold;
+        }
+        .vod-item-label:hover { color: #fff; }
+        .vod-del-btn {
+            padding: 10px 14px; color: var(--danger); background: none;
+            border: none; border-left: 1px solid #333; cursor: pointer; font-size: 14px;
+        }
+        .vod-add-btn {
+            width: 100%; padding: 12px; background: #1a1a1a; color: #888;
+            border: 1px dashed #444; border-radius: 10px; cursor: pointer;
+            font-weight: bold; font-size: 13px; font-family: inherit;
+        }
+        .vod-add-btn:hover { color: #fff; border-color: #666; }
+
+
     </style>
 </head>
 <body>
@@ -120,7 +166,7 @@
     <div class="copyright">
         해당 제작물의 모든 권리는 원작자(카피바라)에게 있으며, <br>
         플랜비 뮤직의 비공식 팬 제작물입니다. <br>
-        버그 및 수정사항 제보 - working.kapibara@gmail.com
+        버그 및 수정사항 제보 - <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8afde5f8e1e3e4eda4e1ebfae3e8ebf8ebcaede7ebe3e6a4e9e5e7">working.kapibara@gmail.com</a>
     </div>
     <div style="margin-top: 20px; margin-bottom: 20px;">
         <img src="logo.png" alt="PlanB Logo" style="width: 120px; height: auto; opacity: 0.8;">
@@ -137,7 +183,27 @@
         <div id="step-list">
             <div id="schedule-list-area" class="list-group"></div>
             <button class="add-btn-large" onclick="goToInput('add')">+ 새로운 일정 추가</button>
-            <button class="close-modal" style="width:100%" onclick="closeModal()">닫기</button>
+
+            <!-- VOD 섹션 -->
+            <div class="vod-section">
+                <div class="vod-section-title">📺 다시보기 VOD 링크</div>
+                <div id="vod-list-area" class="vod-list"></div>
+                <!-- 인라인 입력 패널 (별도 모달 없이) -->
+                <div id="vod-inline-panel" style="display:none; background:#0d0d0d; border:1px solid #333; border-radius:12px; padding:14px; margin-top:8px;">
+                    <div style="font-size:12px; color:#888; font-weight:bold; margin-bottom:10px;" id="vod-panel-title">VOD 링크 추가</div>
+                    <input type="text" id="vodLabelInput" placeholder="제목 (예: 1부, 2부 / 비우면 자동설정)" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:10px; border-radius:8px; box-sizing:border-box; font-family:inherit; font-size:12px; margin-bottom:8px; display:block;">
+                    <input type="text" id="vodUrlInput" placeholder="https://ch.sooplive.co.kr/..." style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:10px; border-radius:8px; box-sizing:border-box; font-family:inherit; font-size:12px; margin-bottom:4px; display:block;">
+                    <div style="font-size:10px; color:#444; margin-bottom:10px; line-height:1.5;">※ 자동 생성된 링크이며, 수정 시 이후 자동 갱신되지 않습니다.</div>
+                    <div style="display:flex; gap:8px;">
+                        <button id="vod-panel-del-btn" onclick="deleteCurrentVod()" style="display:none; flex:1; padding:10px; background:#ff4d4d; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-family:inherit; font-size:13px;">삭제</button>
+                        <button onclick="confirmVod()" style="flex:2; padding:10px; background:#fff; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-family:inherit; font-size:13px;">저장</button>
+                        <button onclick="closeVodPanel()" style="flex:1; padding:10px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-family:inherit; font-size:13px;">취소</button>
+                    </div>
+                </div>
+                <button class="vod-add-btn" id="vod-add-btn" onclick="openVodPanel(-1)">+ VOD 링크 추가</button>
+            </div>
+
+            <button class="close-modal" style="width:100%; margin-top:15px;" onclick="closeModal()">닫기</button>
         </div>
         <div id="step-input" class="input-step">
             <select id="modalCategory" onchange="updateSelectColor(this)">
@@ -161,7 +227,7 @@
     </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     const firebaseConfig = {
         apiKey: "AIzaSyDjxU-1ktf7WMtrGMTWjPMKkaihNU5_MLQ",
         authDomain: "planb-calender.firebaseapp.com",
@@ -175,7 +241,7 @@
     const db = firebase.database();
     
     const today = new Date();
-    let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {}, selectedDateKey = "", modalMode = "add", editIndex = -1;
+    let currentYear = today.getFullYear(), currentMonth = today.getMonth() + 1, currentMember = '빕어', monthData = {}, vodData = {}, selectedDateKey = "", modalMode = "add", editIndex = -1, vodEditIndex = -1;
     
     const categoryColors = { "평뱅": "#31982f", "짧뱅/비번/구플": "#0070bf", "합방/컨텐츠": "#d98516", "플랜비일정": "#702ea0", "중요일정": "#d63f6f", "빙하기": "#87CEEB", "휴뱅": "#404040", "연습생일정": "#ffd966", "뱅온 미정": "#ffffff" };
     const memberEmojis = { '빕어': '😎', '한세긴': '💙', '나비': '💛', '송밤': '💜', '크앙희': '🤍' };
@@ -261,8 +327,41 @@
             if (currentYear === today.getFullYear() && currentMonth === (today.getMonth()+1) && date === today.getDate()) {
                 cell.classList.add('today');
             }
+
+            // VOD 아이콘 표시 조건:
+            // 1. 오늘 이전 날짜만 (오늘 포함 X)
+            // 2. 휴뱅 카테고리면 수동 저장된 VOD 있을 때만
+            const cellDate = new Date(currentYear, currentMonth - 1, date);
+            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const isPast = cellDate < todayMidnight;
+            const isHyubang = schedules.length > 0 && schedules[0].cat === '휴뱅';
+            const isNoBang = schedules.length === 0 || schedules[0].cat === '뱅온 미정';
+            const hasCustomVod = (vodData[key] || []).length > 0;
+            const showVodIcon = isPast && !isNoBang && (!isHyubang || hasCustomVod);
+
             cell.onclick = () => openModal(key, date);
-            cell.append(num, container); grid.appendChild(cell);
+            cell.append(num, container);
+
+            if (showVodIcon) {
+                num.classList.add('has-vod');
+                const vodIcon = document.createElement('span');
+                vodIcon.className = 'vod-indicator';
+                vodIcon.textContent = '';
+                // 삼각형 색상 = 날짜 숫자 글씨 색
+                vodIcon.style.color = num.style.color || '#666';
+                cell.appendChild(vodIcon);
+                num.style.cursor = 'pointer';
+                num.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openVodFromNum(key, date);
+                });
+                vodIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openVodFromNum(key, date);
+                });
+            }
+
+            grid.appendChild(cell);
         }
     }
 
@@ -298,8 +397,126 @@
     function openModal(key, date) {
         selectedDateKey = key;
         document.getElementById('modalDateTitle').textContent = `${currentMonth}월 ${date}일 일정 관리`;
+        renderVodList();
         if (!(monthData[key] || []).length) goToInput('add');
         else { showScheduleList(); document.getElementById('scheduleModal').style.display = 'flex'; }
+    }
+
+    function openVodFromNum(key, date) {
+        // 날짜 숫자 클릭 시 모달 열고 VOD 섹션 바로 보여주기
+        selectedDateKey = key;
+        document.getElementById('modalDateTitle').textContent = `${currentMonth}월 ${date}일 일정 관리`;
+        renderVodList();
+        showScheduleList();
+        document.getElementById('scheduleModal').style.display = 'flex';
+        // VOD 섹션으로 스크롤
+        setTimeout(() => {
+            document.querySelector('.vod-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    // 멤버별 숲 채널 ID
+    const memberChannelIds = {
+        '빕어': 'bver99',
+        '한세긴': 'rose0957',
+        '나비': 'navixx',
+        '송밤': 's07o24',
+        '크앙희': '9wang2'
+    };
+
+    // 날짜 키(YYYY-MM-DD)로 자동 VOD 링크 생성
+    function makeAutoVodUrl(member, dateKey) {
+        const id = memberChannelIds[member];
+        if (!id || !dateKey) return '';
+        const d = dateKey.replace(/-/g, ''); // "2026-02-23" -> "20260223"
+        return `https://www.sooplive.co.kr/station/${id}/vod?keyword=&period=directInput&startDate=${d}&endDate=${d}`;
+    }
+
+    function renderVodList() {
+        const vods = vodData[selectedDateKey] || [];
+        const area = document.getElementById('vod-list-area');
+        const autoUrl = makeAutoVodUrl(currentMember, selectedDateKey);
+
+        if (vods.length === 0) {
+            // 저장된 VOD 없음 → 자동 링크를 미리보기로 표시 (저장 안 된 상태)
+            area.innerHTML = `
+                <div class="vod-item" style="opacity:0.6; border-style:dashed;">
+                    <button class="vod-item-label" onclick="openVodPanel(-1)" title="${autoUrl}" style="font-style:italic;">
+                        🔗 자동 링크 (저장 안 됨) — 클릭하여 저장
+                    </button>
+                </div>`;
+        } else {
+            area.innerHTML = vods.map((v, i) => `
+                <div class="vod-item">
+                    <button class="vod-item-label" onclick="openVodPanel(${i})" title="${v.url}">
+                        🔗 ${v.label || '방송국 VOD 목록'}${v.isCustom ? '' : ' <span style="font-size:9px;color:#aaa;">자동</span>'}
+                    </button>
+                    <button class="vod-del-btn" onclick="deleteVod(${i})">✕</button>
+                </div>`).join('');
+        }
+        closeVodPanel();
+    }
+
+    function openVodPanel(editIdx) {
+        vodEditIndex = editIdx;
+        const isEdit = editIdx >= 0;
+        document.getElementById('vod-panel-title').textContent = isEdit ? 'VOD 링크 수정' : 'VOD 링크 추가';
+        document.getElementById('vod-panel-del-btn').style.display = isEdit ? 'inline-block' : 'none';
+
+        if (isEdit) {
+            const v = vodData[selectedDateKey][editIdx];
+            document.getElementById('vodLabelInput').value = v.label || '';
+            document.getElementById('vodUrlInput').value = v.url || '';
+        } else {
+            document.getElementById('vodLabelInput').value = '방송국 VOD 목록';
+            // 자동 링크 생성
+            document.getElementById('vodUrlInput').value = makeAutoVodUrl(currentMember, selectedDateKey);
+        }
+        document.getElementById('vod-inline-panel').style.display = 'block';
+        document.getElementById('vod-add-btn').style.display = 'none';
+    }
+
+    function closeVodPanel() {
+        document.getElementById('vod-inline-panel').style.display = 'none';
+        document.getElementById('vod-add-btn').style.display = 'block';
+    }
+
+    function confirmVod() {
+        const label = document.getElementById('vodLabelInput').value.trim();
+        const url = document.getElementById('vodUrlInput').value.trim();
+        if (!url) { alert('URL을 입력해주세요.'); return; }
+        if (!vodData[selectedDateKey]) vodData[selectedDateKey] = [];
+
+        // 자동 링크와 다르면 isCustom = true
+        const autoUrl = makeAutoVodUrl(currentMember, selectedDateKey);
+        const isCustom = url !== autoUrl;
+        const entry = { label: label || '방송국 VOD 목록', url, isCustom };
+
+        if (vodEditIndex >= 0) vodData[selectedDateKey][vodEditIndex] = entry;
+        else vodData[selectedDateKey].push(entry);
+
+        renderVodList();
+        renderCalendar();
+        saveVodToServer();
+    }
+
+    function deleteVod(i) {
+        if (confirm('VOD 링크를 삭제하시겠습니까?')) {
+            vodData[selectedDateKey].splice(i, 1);
+            if (!vodData[selectedDateKey].length) delete vodData[selectedDateKey];
+            renderVodList();
+            renderCalendar();
+            saveVodToServer();
+        }
+    }
+
+    function deleteCurrentVod() {
+        deleteVod(vodEditIndex);
+        closeVodPanel();
+    }
+
+    function saveVodToServer() {
+        db.ref(`vod/${currentMember}`).set(vodData).then(() => refreshSyncTime());
     }
 
     function showScheduleList() {
@@ -311,6 +528,7 @@
                 </button>
                 <button class="del-btn-small" onclick="deleteFromList(${i})">✕</button>
             </div>`).join('');
+        renderVodList();
         document.getElementById('step-list').style.display = 'block';
         document.getElementById('step-input').style.display = 'none';
     }
@@ -364,9 +582,17 @@
             monthData = {}; 
             Object.entries(raw).forEach(([k, v]) => { 
                 monthData[normalizeKey(k)] = Array.isArray(v) ? v : [v]; 
-            }); 
-            renderCalendar(); 
-            updateTopUI(); 
+            });
+            // VOD 데이터도 함께 로드
+            db.ref(`vod/${currentMember}`).once('value', vs => {
+                const rawVod = vs.val() || {};
+                vodData = {};
+                Object.entries(rawVod).forEach(([k, v]) => {
+                    vodData[normalizeKey(k)] = Array.isArray(v) ? v : [v];
+                });
+                renderCalendar(); 
+                updateTopUI();
+            });
         }); 
     }
 
@@ -375,15 +601,18 @@
     async function exportImage() {
         document.body.classList.add('exporting');
         const canvas = await html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: null, useCORS: true });
-        const link = document.createElement('a'); link.download = `PlanB_${currentMember}.png`;
-        link.href = canvas.toDataURL(); link.click();
+        const link = document.createElement('a');
+        const pad = n => String(n).padStart(2,'0');
+        const now = new Date();
+        link.download = `PlanB_${currentMember}_${currentYear}${pad(currentMonth)}_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
         document.body.classList.remove('exporting');
     }
 
-    loadData(); fetchGitHubBuild(); refreshSyncTime();
+    // 초기 데이터 로드
+    loadData();
+    fetchGitHubBuild();
 </script>
 </body>
 </html>
-
-
-
