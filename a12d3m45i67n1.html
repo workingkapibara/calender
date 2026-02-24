@@ -335,7 +335,7 @@
             const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const isPast = cellDate < todayMidnight;
             const isHyubang = schedules.length > 0 && schedules[0].cat === '휴뱅';
-            const isNoBang = schedules.length === 0 || schedules[0].cat === '뱅온 미정';
+            const isNoBang = schedules.length === 0 || schedules[0].cat === '뱅온 미정' || schedules[0].cat === '빙하기';
             const hasCustomVod = (vodData[key] || []).length > 0;
             const showVodIcon = isPast && !isNoBang && (!isHyubang || hasCustomVod);
 
@@ -616,5 +616,6 @@
 </script>
 </body>
 </html>
+
 
 
